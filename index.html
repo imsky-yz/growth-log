@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#4C6FFF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="成长记录本">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>小小达人成长记</title>
+<style>
+  :root{
+    --bg:#E8F0FE;
+    --bg-alt:#F6F9FF;
+    --surface:#FFFFFF;
+    --border:#D3E0FA;
+    --ink:#22314A;
+    --ink-soft:#5B6B85;
+    --accent-star:#FFB627;
+    --accent-star-soft:#FFF1D2;
+    --accent-warn:#FF6B6B;
+    --accent-warn-soft:#FFE3E3;
+    --accent-primary:#4C6FFF;
+    --accent-primary-soft:#E4EAFF;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-pill:999px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  header.top{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    margin-bottom:22px;gap:12px;flex-wrap:wrap;
+  }
+  header.top h1{
+    font-size:26px;margin:0 0 4px;letter-spacing:-0.3px;font-weight:800;
+  }
+  header.top p{margin:0;color:var(--ink-soft);font-size:14px;}
+  .gear-btn{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-pill);width:42px;height:42px;
+    font-size:18px;cursor:pointer;flex-shrink:0;
+  }
+  .gear-btn:hover{background:var(--accent-primary-soft);}
+
+  .child-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+  .child-tab{
+    border:1px solid var(--border);background:var(--surface);
+    padding:8px 16px;border-radius:var(--radius-pill);cursor:pointer;
+    font-size:14px;font-weight:600;color:var(--ink-soft);
+    display:flex;align-items:center;gap:6px;
+  }
+  .child-tab.active{
+    background:var(--accent-primary);color:#fff;border-color:var(--accent-primary);
+  }
+  .child-tab .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.6;}
+  .add-child-btn{
+    border:1px dashed var(--border);background:transparent;color:var(--ink-soft);
+    padding:8px 14px;border-radius:var(--radius-pill);cursor:pointer;font-size:14px;
+  }
+  .add-child-btn:hover{border-color:var(--accent-primary);color:var(--accent-primary);}
+
+  .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;}
+  @media (max-width:720px){.grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-lg);padding:20px;
+  }
+  .card h2{font-size:16px;margin:0 0 4px;font-weight:800;}
+  .card .sub{color:var(--ink-soft);font-size:13px;margin:0 0 14px;}
+
+  .task-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:11px 4px;border-bottom:1px solid var(--bg-alt);
+    font-size:14.5px;gap:10px;
+  }
+  .task-row:last-of-type{border-bottom:none;}
+  .task-name{flex:1;}
+  .task-name.done{color:var(--ink-soft);text-decoration:line-through;}
+  .task-btns{display:flex;gap:6px;}
+  .task-btn{
+    border:1px solid var(--border);background:var(--bg-alt);
+    border-radius:var(--radius-md);width:34px;height:34px;
+    cursor:pointer;font-size:15px;line-height:1;
+  }
+  .task-btn.good.selected{background:var(--accent-star);border-color:var(--accent-star);color:#fff;}
+  .task-btn.bad.selected{background:var(--accent-warn);border-color:var(--accent-warn);color:#fff;}
+
+  .submit-btn{
+    margin-top:14px;width:100%;padding:12px;border:none;
+    border-radius:var(--radius-md);background:var(--accent-primary);color:#fff;
+    font-size:14.5px;font-weight:700;cursor:pointer;
+    box-shadow:0 6px 16px -6px rgba(76,111,255,.55);
+  }
+  .submit-btn:disabled{background:var(--border);box-shadow:none;color:var(--ink-soft);cursor:default;}
+
+  .stars-row{font-size:26px;letter-spacing:4px;margin:6px 0 10px;}
+  .stars-count{font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
+  .redeem-btn{
+    width:100%;padding:11px;border:none;border-radius:var(--radius-md);
+    background:var(--accent-star);color:#fff;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .redeem-btn:disabled{background:var(--bg-alt);color:var(--ink-soft);cursor:default;}
+  .redeem-note{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5;}
+  .stat-line{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);padding:6px 0;border-top:1px solid var(--bg-alt);margin-top:10px;}
+  .stat-line b{color:var(--ink);}
+
+  .timeline{margin-top:16px;}
+  .tl-item{
+    display:flex;gap:12px;padding:12px 4px;border-bottom:1px solid var(--bg-alt);
+  }
+  .tl-item:last-child{border-bottom:none;}
+  .tl-date{font-size:12.5px;color:var(--ink-soft);width:70px;flex-shrink:0;padding-top:2px;}
+  .tl-body{flex:1;font-size:13.5px;}
+  .tag{
+    display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:var(--radius-pill);
+    font-size:12px;font-weight:700;margin:2px 6px 2px 0;
+  }
+  .tag.good{background:var(--accent-star-soft);color:#9A6400;}
+  .tag.bad{background:var(--accent-warn-soft);color:#B33939;}
+  .tag.reward{background:var(--accent-primary-soft);color:#33459E;}
+  .tl-note{margin-top:4px;color:var(--ink-soft);}
+  .empty{color:var(--ink-soft);font-size:13.5px;padding:10px 4px;}
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(20,30,60,.35);
+    display:none;align-items:center;justify-content:center;padding:20px;z-index:10;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--surface);border-radius:var(--radius-lg);padding:24px;
+    max-width:440px;width:100%;max-height:86vh;overflow-y:auto;
+  }
+  .modal h3{margin:0 0 14px;font-size:18px;font-weight:800;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;}
+  .field textarea, .field input{
+    width:100%;border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:9px 11px;font-size:13.5px;font-family:inherit;color:var(--ink);background:var(--bg-alt);
+  }
+  .field textarea{min-height:80px;resize:vertical;}
+  .field .hint{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+  .modal-btns{display:flex;gap:8px;margin-top:18px;}
+  .modal-btns button{
+    flex:1;padding:10px;border-radius:var(--radius-md);border:none;font-weight:700;font-size:13.5px;cursor:pointer;
+  }
+  .modal-btns .save{background:var(--accent-primary);color:#fff;}
+  .modal-btns .cancel{background:var(--bg-alt);color:var(--ink-soft);}
+  .remove-child{background:none;border:none;color:var(--accent-warn);font-size:12px;cursor:pointer;margin-top:6px;padding:0;}
+  .loading{color:var(--ink-soft);font-size:13.5px;padding:20px 4px;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="loading">加载中…</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'family-task-tracker-state-v1';
+let state = null;
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function fmtShort(dateStr){
+  const parts = dateStr.split('-');
+  return parts[1]+'-'+parts[2];
+}
+function uid(){ return 'c' + Math.random().toString(36).slice(2,9); }
+
+function defaultState(){
+  return {
+    settings:{
+      tasks:['整理书包','阅读30分钟','按时完成作业','帮忙做家务'],
+      rewards:[
+        {stars:3, text:'看一集喜欢的动画片'},
+        {stars:5, text:'去公园玩一次'},
+        {stars:10, text:'买一个想要的小玩具'}
+      ],
+      punishmentText:'今天取消看电视/玩游戏的时间',
+      weeklyGameMinutes:180,      // 每周游戏时间总量：3小时
+      punishmentMinutesPerTask:30, // 每有一项任务未完成，扣除的游戏时间（分钟）
+      starToGameMinutes:10        // 1颗星星可兑换回的游戏时间（分钟）
+    },
+    children:[
+      { id: uid(), name:'宝贝', color:'#4C6FFF', stars:0, redemptions:0, history:[], gameWeeks:{} }
+    ],
+    activeChildId:null
+  };
+}
+
+function getWeekStart(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  const day = d.getDay(); // 0=周日 .. 6=周六
+  const diff = day===0 ? 6 : day-1; // 以周一为一周的开始
+  d.setDate(d.getDate()-diff);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function getWeekEnd(weekStartStr){
+  const d = new Date(weekStartStr+'T00:00:00');
+  d.setDate(d.getDate()+6);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function ensureWeek(child, weekStart){
+  if(!child.gameWeeks) child.gameWeeks = {};
+  if(child.gameWeeks[weekStart]===undefined){
+    child.gameWeeks[weekStart] = state.settings.weeklyGameMinutes;
+  }
+  return child.gameWeeks[weekStart];
+}
+function fmtMinutes(min){
+  min = Math.max(0, min);
+  const h = Math.floor(min/60), m = min%60;
+  if(h>0 && m>0) return h+'小时'+m+'分钟';
+  if(h>0) return h+'小时';
+  return m+'分钟';
+}
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state = raw ? JSON.parse(raw) : defaultState();
+  } catch(e){
+    state = defaultState();
+  }
+  if(!state.activeChildId && state.children.length){
+    state.activeChildId = state.children[0].id;
+  }
+  // migrate old single-threshold reward format to the new multi-tier rewards list
+  if(!Array.isArray(state.settings.rewards)){
+    const oldThreshold = state.settings.rewardThreshold || 5;
+    const oldText = state.settings.rewardText || '奖励';
+    state.settings.rewards = [{stars: oldThreshold, text: oldText}];
+    delete state.settings.rewardThreshold;
+    delete state.settings.rewardText;
+  }
+  state.settings.rewards.sort((a,b)=>a.stars-b.stars);
+  // migrate: ensure weekly game-time settings exist
+  if(typeof state.settings.weeklyGameMinutes !== 'number') state.settings.weeklyGameMinutes = 180;
+  if(typeof state.settings.punishmentMinutesPerTask !== 'number') state.settings.punishmentMinutesPerTask = 30;
+  if(typeof state.settings.starToGameMinutes !== 'number') state.settings.starToGameMinutes = 10;
+  state.children.forEach(c=>{ if(!c.gameWeeks) c.gameWeeks = {}; });
+  state.children.forEach(c=>{
+    c.history.forEach(h=>{ if(!h.id) h.id = uid(); });
+  });
+}
+
+async function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e){
+    console.error('保存失败', e);
+    showAlert('保存失败,可能是浏览器存储空间已满或不支持本地存储。建议先导出备份。');
+  }
+}
+
+// ---- transient per-render task selection (before submitting) ----
+let todaySelections = {}; // taskIndex -> 'good' | 'bad'
+let selectedDate = todayStr(); // which day's record we're currently viewing/logging
+
+function getActiveChild(){
+  return state.children.find(c=>c.id===state.activeChildId);
+}
+function findRecordForDate(child, date){
+  return child.history.find(h=>h.date===date && h.type==='daily');
+}
+function hasSubmittedToday(child){
+  return !!findRecordForDate(child, selectedDate);
+}
+function onDateChange(val){
+  if(!val) return;
+  selectedDate = val;
+  todaySelections = {};
+  render();
+}
+
+// ---- custom in-page dialogs (replace native alert/confirm/prompt, which get silently
+// blocked in some sandboxed preview environments, making buttons look unresponsive) ----
+let _pendingConfirm = null;
+let _pendingPrompt = null;
+
+function closeDialog(){
+  document.getElementById('overlay').classList.remove('show');
+  _pendingConfirm = null;
+  _pendingPrompt = null;
+}
+function showAlert(message){
+  document.getElementById('modalBody').innerHTML = `
+    <h3>提示</h3>
+    <p style="font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 4px;">${escapeHtml(message)}</p>
+    <div class="modal-btns"><button class="save" onclick="closeDialog()">知道了</button></div>
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+function showConfirm(message, onConfirm){
+  _pendingConfirm = onConfirm;
+  document.getElementById('modalBody').innerHTML = `
+    <h3>请确认</h3>
+    <p style="font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 4px;">${escapeHtml(message)}</p>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeDialog()">取消</button>
+      <button class="save" onclick="_runPendingConfirm()">确定</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+function _runPendingConfirm(){
+  const cb = _pendingConfirm;
+  closeDialog();
+  if(cb) cb();
+}
+function showPrompt(message, onSubmit){
+  _pendingPrompt = onSubmit;
+  document.getElementById('modalBody').innerHTML = `
+    <h3>${escapeHtml(message)}</h3>
+    <div class="field"><input id="f-prompt-input" type="text" placeholder="请输入"></div>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeDialog()">取消</button>
+      <button class="save" onclick="_runPendingPrompt()">确定</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('show');
+  const input = document.getElementById('f-prompt-input');
+  if(input){
+    input.focus();
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') _runPendingPrompt(); });
+  }
+}
+function _runPendingPrompt(){
+  const input = document.getElementById('f-prompt-input');
+  const val = input ? input.value.trim() : '';
+  const cb = _pendingPrompt;
+  closeDialog();
+  if(val && cb) cb(val);
+}
+
+function render(){
+  const app = document.getElementById('app');
+  const child = getActiveChild();
+
+  let html = '';
+  html += `<header class="top">
+    <div>
+      <h1>小小达人成长记</h1>
+      <p>记录每天的努力，攒下星星换奖励</p>
+    </div>
+    <button class="gear-btn" onclick="openSettings()" title="设置">⚙️</button>
+  </header>`;
+
+  html += `<div class="child-tabs">`;
+  state.children.forEach(c=>{
+    html += `<button class="child-tab ${c.id===state.activeChildId?'active':''}" onclick="selectChild('${c.id}')">
+      <span class="dot" style="color:${c.color}"></span>${escapeHtml(c.name)}
+    </button>`;
+  });
+  html += `<button class="add-child-btn" onclick="addChild()">+ 添加孩子</button></div>`;
+
+  if(!child){
+    html += `<div class="card"><p class="empty">还没有添加孩子，先点击上方"添加孩子"吧。</p></div>`;
+    app.innerHTML = html;
+    return;
+  }
+
+  const existingRecord = findRecordForDate(child, selectedDate);
+  const submitted = !!existingRecord;
+  todaySelections = todaySelections || {};
+  const isToday = selectedDate === todayStr();
+
+  // task list card
+  html += `<div class="grid">`;
+  html += `<div class="card">
+    <h2>${isToday ? '今天的任务' : '补记任务'}</h2>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+      <input type="date" value="${selectedDate}" max="${todayStr()}" onchange="onDateChange(this.value)"
+        style="border:1px solid var(--border);border-radius:var(--radius-md);padding:6px 9px;font-size:13px;color:var(--ink-soft);background:var(--bg-alt);">
+      <span class="sub" style="margin:0;">${submitted ? '· 该日期已记录' : '· 还未记录'}</span>
+    </div>`;
+
+  state.settings.tasks.forEach((t, i)=>{
+    const sel = submitted ? (existingRecord.results[i].done ? 'good':'bad') : todaySelections[i];
+    html += `<div class="task-row">
+      <span class="task-name ${sel==='good'?'done':''}">${escapeHtml(t)}</span>
+      <div class="task-btns">
+        <button class="task-btn good ${sel==='good'?'selected':''}" ${submitted?'disabled':''} onclick="pickTask(${i},'good')" title="很棒">✓</button>
+        <button class="task-btn bad ${sel==='bad'?'selected':''}" ${submitted?'disabled':''} onclick="pickTask(${i},'bad')" title="未完成">✕</button>
+      </div>
+    </div>`;
+  });
+
+  const allPicked = state.settings.tasks.every((_,i)=>todaySelections[i]);
+  if(submitted){
+    html += `<button class="submit-btn" onclick="clearRecordForDate()" style="background:var(--bg-alt);color:var(--ink-soft);box-shadow:none;">重新编辑这一天</button>`;
+  } else {
+    html += `<button class="submit-btn" ${allPicked?'':'disabled'} onclick="submitDay()">提交这一天的记录</button>`;
+  }
+  html += `</div>`; // end task card
+
+  // stars/reward card — multiple reward tiers, each with its own star cost
+  const rewards = state.settings.rewards;
+  const punishmentCount = child.history
+    .filter(h=>h.type==='daily')
+    .reduce((sum,h)=> sum + h.results.filter(r=>!r.done).length, 0);
+  html += `<div class="card">
+    <h2>星星商店</h2>
+    <p class="sub">当天所有任务都完成，才能获得1颗"很棒"星星；不同星星数量可以兑换不同奖励</p>
+    <div class="stars-count" style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:12px;">⭐ 当前星星：${child.stars} 颗</div>`;
+
+  if(rewards.length===0){
+    html += `<p class="empty" style="padding:2px 0;">还没有设置奖励，去右上角"设置"里添加吧。</p>`;
+  } else {
+    rewards.forEach((r, idx)=>{
+      const enough = child.stars >= r.stars;
+      html += `<div class="task-row">
+        <span class="task-name">⭐×${r.stars}　${escapeHtml(r.text)}</span>
+        <button class="task-btn good" style="width:auto;padding:0 12px;${enough?'':'opacity:.45;'}" ${enough?'':'disabled'} onclick="redeemReward(${idx})">兑换</button>
+      </div>`;
+    });
+  }
+
+  html += `
+    <div class="stat-line"><span>已兑换奖励</span><b>${child.redemptions} 次</b></div>
+    <div class="stat-line"><span>已执行惩罚</span><b>${punishmentCount} 次</b></div>
+    <div class="stat-line"><span>未完成惩罚内容</span><b>${escapeHtml(state.settings.punishmentText)}</b></div>
+  </div>`;
+  html += `</div>`; // end grid
+
+  // weekly game-time budget card
+  const curWeekStart = getWeekStart(todayStr());
+  const curWeekEnd = getWeekEnd(curWeekStart);
+  const weeklyCap = state.settings.weeklyGameMinutes;
+  const remaining = ensureWeek(child, curWeekStart);
+  const hasDeduction = remaining < weeklyCap;
+  const pct = Math.max(0, Math.min(100, Math.round(remaining/weeklyCap*100)));
+  const canExchange = hasDeduction && child.stars >= 1;
+  html += `<div class="card">
+    <h2>本周游戏时间</h2>
+    <p class="sub">${fmtShort(curWeekStart)} ~ ${fmtShort(curWeekEnd)} · 每周总额 ${fmtMinutes(weeklyCap)}，每有1项任务未完成扣${state.settings.punishmentMinutesPerTask}分钟</p>
+    <div style="background:var(--bg-alt);border-radius:var(--radius-pill);height:14px;overflow:hidden;margin-bottom:8px;">
+      <div style="width:${pct}%;height:100%;background:${hasDeduction?'var(--accent-warn)':'var(--accent-star)'};"></div>
+    </div>
+    <div class="stars-count" style="margin-bottom:10px;">剩余 <b>${fmtMinutes(remaining)}</b> / ${fmtMinutes(weeklyCap)}</div>
+    ${hasDeduction ? `
+      <div class="redeem-note" style="margin-bottom:10px;">本周已被扣除 ${fmtMinutes(weeklyCap-remaining)} 游戏时间，可以用星星换回来</div>
+      <button class="redeem-btn" ${canExchange?'':'disabled'} onclick="redeemGameTime()">用1颗星兑换${state.settings.starToGameMinutes}分钟游戏时间（当前星星：${child.stars}）</button>
+    ` : `<p class="empty" style="padding:2px 0;">本周游戏时间还没有被扣除，暂不需要兑换。</p>`}
+  </div>`;
+
+  // dedicated rewards & punishments record (all data below is read from localStorage, so it stays after refresh/reopen)
+  const rewardLogs = child.history.filter(h=>h.type==='reward');
+  const gameLogs = child.history.filter(h=>h.type==='gametime');
+  const allExchangeLogs = rewardLogs.concat(gameLogs);
+  const activeExchangeCount = allExchangeLogs.filter(r=>!r.revoked).length;
+  const punishLogs = [];
+  child.history.filter(h=>h.type==='daily').forEach(h=>{
+    const failedThisDay = h.results.filter(r=>!r.done);
+    const perTaskMinutes = failedThisDay.length ? Math.round((h.gameMinutesDeducted||0)/failedThisDay.length) : 0;
+    failedThisDay.forEach(r=>{
+      punishLogs.push({date:h.date, task:r.task, text: h.punishmentText || state.settings.punishmentText, minutes: perTaskMinutes});
+    });
+  });
+  html += `<div class="card">
+    <h2>奖励与惩罚记录</h2>
+    <p class="sub">已保存在本机，重新打开也不会丢失</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;">🎁 奖励 / 游戏时间兑换（共${activeExchangeCount}次）</div>
+        ${allExchangeLogs.length===0 ? '<p class="empty" style="padding:2px 0;">暂无</p>' :
+          allExchangeLogs.slice().sort((a,b)=>a.date<b.date?1:-1).slice(0,10).map(r=>{
+            const label = r.type==='gametime'
+              ? `⭐×${r.starsCost} 兑换 ${fmtMinutes(r.minutesAdded)} 游戏时间`
+              : `⭐×${r.starsCost||''} ${escapeHtml(r.rewardText)}`;
+            if(r.revoked){
+              return `<div style="font-size:13px;margin-bottom:6px;color:var(--ink-soft);text-decoration:line-through;">${fmtShort(r.date)} ${label} <span style="text-decoration:none;">（已撤销）</span></div>`;
+            }
+            return `<div style="font-size:13px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+              <span><b>${fmtShort(r.date)}</b> ${label}</span>
+              <button onclick="revokeRedemption('${r.id}')" style="border:none;background:none;color:var(--accent-warn);font-size:12px;cursor:pointer;padding:0;flex-shrink:0;">撤销</button>
+            </div>`;
+          }).join('')}
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;">⚠️ 惩罚记录（共${punishLogs.length}次）</div>
+        ${punishLogs.length===0 ? '<p class="empty" style="padding:2px 0;">暂无</p>' :
+          punishLogs.slice().reverse().slice(0,10).map(p=>`<div style="font-size:13px;margin-bottom:6px;"><b>${fmtShort(p.date)}</b> ${escapeHtml(p.task)}：${escapeHtml(p.text)}${p.minutes?` (-${fmtMinutes(p.minutes)})`:''}</div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  // timeline
+  html += `<div class="card timeline">
+    <h2>成长记录时间线</h2>`;
+  const hist = child.history.slice().reverse();
+  if(hist.length===0){
+    html += `<p class="empty">还没有记录，选好日期、完成任务后点击"提交这一天的记录"试试吧。</p>`;
+  } else {
+    hist.slice(0,30).forEach(h=>{
+      html += `<div class="tl-item"><div class="tl-date">${fmtShort(h.date)}</div><div class="tl-body">`;
+      if(h.type==='daily'){
+        const failed = h.results.filter(r=>!r.done);
+        if(failed.length===0){
+          html += `<span class="tag good">全部完成 · 很棒 ⭐</span>`;
+        } else {
+          failed.forEach(r=>{
+            html += `<span class="tag bad" style="display:inline-block;margin-bottom:4px;">未完成：${escapeHtml(r.task)}</span>`;
+          });
+          html += `<div class="tl-note">⚠️ 惩罚：${escapeHtml(h.punishmentText || state.settings.punishmentText)}${h.gameMinutesDeducted ? `（本周游戏时间 -${fmtMinutes(h.gameMinutesDeducted)}）` : ''}</div>`;
+        }
+      } else if(h.type==='reward'){
+        html += h.revoked
+          ? `<span class="tag reward" style="opacity:.5;text-decoration:line-through;">🎁 兑换奖励（⭐×${h.starsCost||''}）</span><div class="tl-note">${escapeHtml(h.rewardText)}（已撤销）</div>`
+          : `<span class="tag reward">🎁 兑换奖励（⭐×${h.starsCost||''}）</span><div class="tl-note">${escapeHtml(h.rewardText)}</div>`;
+      } else if(h.type==='gametime'){
+        html += h.revoked
+          ? `<span class="tag reward" style="opacity:.5;text-decoration:line-through;">🕹️ 兑换游戏时间（⭐×${h.starsCost||1}）</span><div class="tl-note">换回 ${fmtMinutes(h.minutesAdded)} 游戏时间（已撤销）</div>`
+          : `<span class="tag reward">🕹️ 兑换游戏时间（⭐×${h.starsCost||1}）</span><div class="tl-note">换回 ${fmtMinutes(h.minutesAdded)} 游戏时间</div>`;
+      }
+      html += `</div></div>`;
+    });
+  }
+  html += `</div>`;
+
+  app.innerHTML = html;
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.innerText = s;
+  return d.innerHTML;
+}
+
+function pickTask(i, val){
+  const child = getActiveChild();
+  if(hasSubmittedToday(child)) return;
+  todaySelections[i] = todaySelections[i]===val ? undefined : val;
+  render();
+}
+
+async function submitDay(){
+  const child = getActiveChild();
+  if(hasSubmittedToday(child)) return;
+  const results = state.settings.tasks.map((t,i)=>({task:t, done: todaySelections[i]==='good'}));
+  const allDone = results.every(r=>r.done);
+  if(allDone){
+    child.stars += 1;
+  }
+  const weekStart = getWeekStart(selectedDate);
+  ensureWeek(child, weekStart);
+  const failedCount = results.filter(r=>!r.done).length;
+  const gameMinutesDeducted = failedCount * state.settings.punishmentMinutesPerTask;
+  if(gameMinutesDeducted > 0){
+    child.gameWeeks[weekStart] = Math.max(0, child.gameWeeks[weekStart] - gameMinutesDeducted);
+  }
+  child.history.push({
+    id: uid(),
+    type:'daily',
+    date: selectedDate,
+    results,
+    punishmentText: state.settings.punishmentText,
+    gameMinutesDeducted,
+    weekStart
+  });
+  // keep history sorted by date so the timeline stays in order regardless of backfilled entries
+  child.history.sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  todaySelections = {};
+  await saveState();
+  render();
+}
+
+async function clearRecordForDate(){
+  const child = getActiveChild();
+  const rec = findRecordForDate(child, selectedDate);
+  if(!rec) return;
+  showConfirm(`确定要清除 ${selectedDate} 的记录并重新编辑吗？`, async ()=>{
+    if(rec.results.every(r=>r.done)){
+      child.stars = Math.max(0, child.stars - 1);
+    }
+    if(rec.gameMinutesDeducted){
+      const weekStart = rec.weekStart || getWeekStart(rec.date);
+      ensureWeek(child, weekStart);
+      child.gameWeeks[weekStart] = Math.min(state.settings.weeklyGameMinutes, child.gameWeeks[weekStart] + rec.gameMinutesDeducted);
+    }
+    child.history = child.history.filter(h=>h!==rec);
+    todaySelections = {};
+    await saveState();
+    render();
+  });
+}
+
+async function redeemGameTime(){
+  const child = getActiveChild();
+  const weekStart = getWeekStart(todayStr());
+  ensureWeek(child, weekStart);
+  const rate = state.settings.starToGameMinutes;
+  if(child.stars < 1) return;
+  if(child.gameWeeks[weekStart] >= state.settings.weeklyGameMinutes) return;
+  child.stars -= 1;
+  child.gameWeeks[weekStart] = Math.min(state.settings.weeklyGameMinutes, child.gameWeeks[weekStart] + rate);
+  child.history.push({
+    id: uid(),
+    type:'gametime',
+    date: todayStr(),
+    minutesAdded: rate,
+    starsCost: 1,
+    weekStart
+  });
+  await saveState();
+  render();
+}
+
+async function redeemReward(idx){
+  const child = getActiveChild();
+  const reward = state.settings.rewards[idx];
+  if(!reward || child.stars < reward.stars) return;
+  child.stars -= reward.stars;
+  child.redemptions += 1;
+  child.history.push({
+    id: uid(),
+    type:'reward',
+    date: todayStr(),
+    rewardText: reward.text,
+    starsCost: reward.stars
+  });
+  await saveState();
+  render();
+}
+
+async function revokeRedemption(id){
+  const child = getActiveChild();
+  const entry = child.history.find(h=>h.id===id);
+  if(!entry || entry.revoked) return;
+  const starsBack = entry.starsCost || 1;
+  const label = entry.type==='gametime'
+    ? `确定要撤销这次游戏时间兑换吗？将退回 ${starsBack} 颗星星，并扣回已换到的 ${fmtMinutes(entry.minutesAdded)} 游戏时间。`
+    : `确定要撤销这次兑换吗？将退回 ${starsBack} 颗星星（奖励：${entry.rewardText}）。`;
+  showConfirm(label, async ()=>{
+    entry.revoked = true;
+    child.stars += starsBack;
+    if(entry.type==='reward'){
+      child.redemptions = Math.max(0, child.redemptions - 1);
+    }
+    if(entry.type==='gametime'){
+      const weekStart = entry.weekStart || getWeekStart(entry.date);
+      ensureWeek(child, weekStart);
+      child.gameWeeks[weekStart] = Math.max(0, child.gameWeeks[weekStart] - entry.minutesAdded);
+    }
+    await saveState();
+    render();
+  });
+}
+
+function selectChild(id){
+  state.activeChildId = id;
+  todaySelections = {};
+  render();
+}
+
+const CHILD_COLORS = ['#4C6FFF','#FF6B6B','#22B07D','#FFB627','#A64CFF','#00B3C6'];
+async function addChild(){
+  showPrompt('孩子的名字是？', async (name)=>{
+    const c = {
+      id: uid(),
+      name: name.trim(),
+      color: CHILD_COLORS[state.children.length % CHILD_COLORS.length],
+      stars:0, redemptions:0, history:[], gameWeeks:{}
+    };
+    state.children.push(c);
+    state.activeChildId = c.id;
+    await saveState();
+    render();
+  });
+}
+
+// ---- settings modal ----
+function openSettings(){
+  const s = state.settings;
+  const child = getActiveChild();
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `
+    <h3>设置</h3>
+    <div class="field">
+      <label>每日任务清单（每行一项）</label>
+      <textarea id="f-tasks">${s.tasks.join('\n')}</textarea>
+    </div>
+    <div class="field">
+      <label>星星兑换奖励（每行一档，格式：星星数,奖励内容）</label>
+      <textarea id="f-rewards" style="min-height:100px;">${s.rewards.map(r=>r.stars+','+r.text).join('\n')}</textarea>
+      <div class="hint">例如：3,看一集喜欢的动画片　　5,去公园玩一次　　10,买一个想要的小玩具。可以设置任意多档，星星数不同就能兑换不同奖励。</div>
+    </div>
+    <div class="field">
+      <label>未完成任务时的惩罚</label>
+      <input id="f-punishment" type="text" value="${escapeHtml(s.punishmentText)}">
+      <div class="hint">未完成任务提交后，这条惩罚会显示在当天的记录里，提醒家长执行。</div>
+    </div>
+    <div class="field">
+      <label>每周游戏时间总额（小时）</label>
+      <input id="f-weekly-hours" type="number" min="0" step="0.5" value="${(s.weeklyGameMinutes/60)}">
+    </div>
+    <div class="field">
+      <label>每有1项任务未完成，扣除的游戏时间（分钟）</label>
+      <input id="f-punish-minutes" type="number" min="0" step="5" value="${s.punishmentMinutesPerTask}">
+    </div>
+    <div class="field">
+      <label>1颗星星可兑换回的游戏时间（分钟）</label>
+      <input id="f-star-minutes" type="number" min="1" step="5" value="${s.starToGameMinutes}">
+      <div class="hint">只有本周游戏时间被扣除过，才能用星星兑换回来。</div>
+    </div>
+    ${child ? `<div class="field">
+      <label>当前孩子：${escapeHtml(child.name)}</label>
+      <button class="remove-child" onclick="removeCurrentChild()">删除这个孩子的记录</button>
+    </div>` : ''}
+    <div class="field">
+      <label>数据备份</label>
+      <div class="hint" style="margin-bottom:8px;">数据保存在这台设备的浏览器里，清理浏览器数据可能会导致丢失，建议不定期导出备份。</div>
+      <div class="modal-btns" style="margin-top:0;">
+        <button class="cancel" onclick="exportData()">导出备份</button>
+        <button class="cancel" onclick="showImportBox()">导入备份</button>
+      </div>
+      <div id="importBox" style="display:none;margin-top:10px;">
+        <textarea id="f-import" placeholder="粘贴之前导出的备份内容到这里" style="min-height:90px;"></textarea>
+        <div class="modal-btns">
+          <button class="save" onclick="importData()">确认导入</button>
+        </div>
+      </div>
+      <button class="remove-child" onclick="resetAllData()" style="margin-top:12px;">清除本机缓存（重置所有数据）</button>
+    </div>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeSettings()">取消</button>
+      <button class="save" onclick="saveSettings()">保存</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+function showImportBox(){
+  document.getElementById('importBox').style.display = 'block';
+}
+async function resetAllData(){
+  showConfirm('确定要清除本机缓存吗？这会删除所有孩子的打卡记录、奖励惩罚历史和设置，且无法恢复。建议先点"导出备份"保存一份再清除。', async ()=>{
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    state = defaultState();
+    state.activeChildId = state.children[0].id;
+    await saveState();
+    render();
+  });
+}
+function exportData(){
+  const json = JSON.stringify(state, null, 2);
+  const body = document.getElementById('modalBody');
+  const box = document.createElement('div');
+  box.className = 'field';
+  box.innerHTML = `<label>备份内容（请全选复制并保存到备忘录/文件中）</label>
+    <textarea readonly style="min-height:120px;" onclick="this.select()">${escapeHtml(json)}</textarea>`;
+  body.insertBefore(box, body.querySelector('.modal-btns'));
+  const ta = box.querySelector('textarea');
+  ta.focus(); ta.select();
+}
+async function importData(){
+  const raw = document.getElementById('f-import').value.trim();
+  if(!raw){ showAlert('请先粘贴备份内容'); return; }
+  let parsed;
+  try{
+    parsed = JSON.parse(raw);
+    if(!parsed.settings || !parsed.children){ throw new Error('格式不对'); }
+  } catch(e){
+    showAlert('导入失败，请确认粘贴的内容是完整的备份数据。');
+    return;
+  }
+  showConfirm('导入将覆盖当前设备上的所有记录，确定要继续吗？', async ()=>{
+    state = parsed;
+    await saveState();
+    render();
+  });
+}
+function closeSettings(){
+  document.getElementById('overlay').classList.remove('show');
+}
+async function saveSettings(){
+  const tasksRaw = document.getElementById('f-tasks').value;
+  const tasks = tasksRaw.split('\n').map(t=>t.trim()).filter(Boolean);
+  const rewardsRaw = document.getElementById('f-rewards').value;
+  const rewardLines = rewardsRaw.split('\n').map(l=>l.trim()).filter(Boolean);
+  const rewards = [];
+  for(const line of rewardLines){
+    const commaIdx = line.indexOf(',');
+    const commaIdxCn = line.indexOf('，');
+    const idx = commaIdx>=0 ? commaIdx : commaIdxCn;
+    if(idx<0) continue;
+    const starsPart = line.slice(0, idx).trim();
+    const textPart = line.slice(idx+1).trim();
+    const stars = parseInt(starsPart);
+    if(!stars || stars<1 || !textPart) continue;
+    rewards.push({stars, text:textPart});
+  }
+  const punishment = document.getElementById('f-punishment').value.trim() || '取消一项娱乐活动';
+  const weeklyHours = parseFloat(document.getElementById('f-weekly-hours').value);
+  const punishMinutes = parseInt(document.getElementById('f-punish-minutes').value);
+  const starMinutes = parseInt(document.getElementById('f-star-minutes').value);
+  if(tasks.length===0){ showAlert('请至少保留一项任务'); return; }
+  if(rewards.length===0){ showAlert('请至少设置一档奖励，格式为：星星数,奖励内容'); return; }
+  rewards.sort((a,b)=>a.stars-b.stars);
+  state.settings.tasks = tasks;
+  state.settings.rewards = rewards;
+  state.settings.punishmentText = punishment;
+  state.settings.weeklyGameMinutes = (weeklyHours>=0 ? weeklyHours : 3) * 60;
+  state.settings.punishmentMinutesPerTask = (punishMinutes>=0 ? punishMinutes : 30);
+  state.settings.starToGameMinutes = (starMinutes>=1 ? starMinutes : 10);
+  await saveState();
+  closeSettings();
+  render();
+}
+async function removeCurrentChild(){
+  if(state.children.length<=1){ showAlert('至少需要保留一个孩子'); return; }
+  showConfirm('确定要删除这个孩子的所有记录吗？此操作不可恢复。', async ()=>{
+    const id = state.activeChildId;
+    state.children = state.children.filter(c=>c.id!==id);
+    state.activeChildId = state.children[0].id;
+    await saveState();
+    render();
+  });
+}
+
+(async function init(){
+  await loadState();
+  render();
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(e=>console.log('service worker 注册失败(本地file://打开时属正常现象):', e));
+  });
+}
+</script>
+</body>
+</html>
